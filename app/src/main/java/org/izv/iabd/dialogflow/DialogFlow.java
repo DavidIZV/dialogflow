@@ -18,8 +18,15 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Value;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DialogFlow {
 
@@ -28,6 +35,9 @@ public class DialogFlow {
     private String uuid = UUID.randomUUID().toString();
     private String TAG = "DRG-DialogFlow";
     public String actionLabel = "Ya tiene su cita para el día ";
+    private String actionLabel_2 = "¿Para que día?";
+    private String actionLabel_3 = "¿A que hora?";
+    private String url = "informatica.ieszaidinvergeles.org:10056/pia/practica3/piapp/public";
 
     public void initialize(Context context) {
         try {
@@ -65,21 +75,45 @@ public class DialogFlow {
         String response = "";
         QueryResult queryResult = respuestaDf.getQueryResult();
         String queryResponse = queryResult.getFulfillmentText();
+
+        Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
+        String day = fieldsMap.get("dia").getStringValue();
+        String hour = fieldsMap.get("hora").getStringValue();
+
         if (queryResponse.contains(actionLabel)) {
             String responseAux = actionLabel;
 
-            Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
-            String day = fieldsMap.get("dia").getStringValue();
             String onlyDay = DateFormatter.getDateFormated(day, DateFormatter.getDayFormat());
             String onlyMonth = DateFormatter.getDateFormated(day, DateFormatter.getDayFormat());
             responseAux += onlyDay + " de " + onlyMonth + ", a las ";
 
-            String hour = fieldsMap.get("hora").getStringValue();
             hour = DateFormatter.getDateFormated(hour, DateFormatter.getHourFormat());
             responseAux += hour;
 
             responseAux += queryResponse.substring(55);
             response = responseAux;
+        } else if (queryResponse.contains(actionLabel_2)) {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("https://" + url + "/api/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            IzvServer client = retrofit.create(IzvServer.class);
+
+            Call<ArrayList<Cita>> call = client.get(day);
+            call.enqueue(new Callback<ArrayList<Cita>>() {
+                @Override
+                public void onResponse(Call<ArrayList<Cita>> call, Response<ArrayList<Cita>> response) {
+                    Log.v(TAG, response.body().toString());
+                }
+
+                @Override
+                public void onFailure(Call<ArrayList<Cita>> call, Throwable t) {
+                    Log.v(TAG, t.getLocalizedMessage());
+                }
+            });
+        } else if (queryResponse.contains(actionLabel_3)) {
+
         } else {
             response = queryResponse;
         }
