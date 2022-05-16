@@ -7,7 +7,6 @@ import android.provider.CalendarContract;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -24,8 +23,6 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
     private EditText escrito;
-    private Button microfono;
-    private Button enviar;
     private TextView conversacion;
     private TextToSpeech tts;
     private boolean ttsReady = false;
@@ -39,7 +36,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             ttsReady = true;
             tts.setLanguage(new Locale("spa", "ES"));
         } else {
-            Log.d("DRG", "Error: El valor del estado para tts es: " + String.valueOf(status));
+            String theStatus = String.valueOf(status);
+            Log.d("DRG", "Error: El valor del estado para tts es: " + theStatus);
         }
     }
 
@@ -53,8 +51,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     private void initialize() {
         escrito = findViewById(R.id.escrito);
-        microfono = findViewById(R.id.microfono);
-        enviar = findViewById(R.id.enviar);
         conversacion = findViewById(R.id.conversacion);
         tts = new TextToSpeech(this, this);
         sttLauncher = getSttLauncher();
@@ -62,11 +58,11 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         dialogFlow = new DialogFlow();
         dialogFlow.initialize(this);
 
-        microfono.setOnClickListener(view -> {
-            sttLauncher.launch(sttIntent);
-        });
+        findViewById(R.id.microfono).setOnClickListener(view ->
+                sttLauncher.launch(sttIntent)
+        );
 
-        enviar.setOnClickListener(view -> {
+        findViewById(R.id.enviar).setOnClickListener(view -> {
             String text = escrito.getText().toString();
             nuevaLinea(text);
             procesarRespuestaDialog(dialogFlow.speakToDialogFlow(text));
@@ -103,25 +99,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         return intent;
     }
 
-    public void saveInCalendar(String nombre, String fecha) {
-        long begin = DateFormatter.getMiliseconds(fecha);
-        Intent intent = new Intent(Intent.ACTION_INSERT)
-                .setData(CalendarContract.Events.CONTENT_URI)
-                .putExtra(CalendarContract.Events.TITLE, nombre)
-                //.putExtra(CalendarContract.Events.EVENT_LOCATION, location)
-                .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, begin);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Log.d("DRG", "Error: No tenemos el paquete");
-            nuevaLinea("No tenemos el paquete");
-        }
-    }
-
     private void procesarFraseUsuario(ActivityResult result) {
         String text = "Error";
         if (result.getResultCode() == Activity.RESULT_OK) {
-            List<String> r = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            Intent data = result.getData();
+            assert data != null;
+            List<String> r = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             text = r.get(0);
         }
         nuevaLinea(text);
@@ -135,6 +118,21 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         if (botReply.contains(dialogFlow.actionLabel)) {
             saveInCalendar(dialogFlow.getNombre(respuestaDf), dialogFlow.getRightDate(respuestaDf));
+        }
+    }
+
+    public void saveInCalendar(String nombre, String fecha) {
+        long begin = DateFormatter.getMiliseconds(fecha);
+        Intent intent = new Intent(Intent.ACTION_INSERT)
+                .setData(CalendarContract.Events.CONTENT_URI)
+                .putExtra(CalendarContract.Events.TITLE, nombre)
+                //.putExtra(CalendarContract.Events.EVENT_LOCATION, location)
+                .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, begin);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Log.d("DRG", "Error: No tenemos el paquete");
+            nuevaLinea("No tenemos el paquete");
         }
     }
 }
