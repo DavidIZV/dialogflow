@@ -1,14 +1,7 @@
 package org.izv.iabd.dialogflow;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.speech.RecognizerIntent;
@@ -18,16 +11,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.cloud.dialogflow.v2.DetectIntentResponse;
-import com.google.protobuf.Value;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import com.google.cloud.dialogflow.v2.DetectIntentResponse;
+
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
@@ -40,7 +32,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private ActivityResultLauncher<Intent> sttLauncher;
     private Intent sttIntent;
     private DialogFlow dialogFlow;
-    private String actionLabel = "Ya tiene su cita para el día";
 
     @Override
     public void onInit(int status) {
@@ -113,16 +104,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     }
 
     public void saveInCalendar(String nombre, String fecha) {
-        long begin = 0;
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            DateTimeFormatter isoDateFormatter = null;
-            isoDateFormatter = DateTimeFormatter.ISO_DATE_TIME;
-            LocalDateTime ldate = LocalDateTime.parse(fecha, isoDateFormatter);
-            Instant instant = ldate.atZone(ZoneId.of("UTC+2")).toInstant();
-            begin = instant.toEpochMilli();
-        }
-
+        long begin = DateFormatter.getMiliseconds(fecha);
         Intent intent = new Intent(Intent.ACTION_INSERT)
                 .setData(CalendarContract.Events.CONTENT_URI)
                 .putExtra(CalendarContract.Events.TITLE, nombre)
@@ -147,20 +129,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     }
 
     private void procesarRespuestaDialog(DetectIntentResponse respuestaDf) {
-        String botReply = respuestaDf.getQueryResult().getFulfillmentText();
-        if (botReply.contains(actionLabel)) {
-            Map<String, Value> params = respuestaDf.getQueryResult().getParameters().getFieldsMap();
-
-            Value nombreResponse = params.get("nombre");
-            String nombre = String.valueOf(nombreResponse.getStringValue());
-            Value diaResponse = params.get("dia");
-            String dia = String.valueOf(diaResponse.getStringValue()).split("T")[0];
-            Value horaResponse = params.get("hora");
-            String hora = String.valueOf(horaResponse.getStringValue()).split("T")[1];
-
-            saveInCalendar(nombre, dia + "T" + hora);
-        }
+        String botReply = dialogFlow.getResponse(respuestaDf);
         nuevaLinea(botReply);
         hablar(botReply);
+
+        if (botReply.contains(dialogFlow.actionLabel)) {
+            saveInCalendar(dialogFlow.getNombre(respuestaDf), dialogFlow.getRightDate(respuestaDf));
+        }
     }
 }
