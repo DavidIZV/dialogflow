@@ -61,7 +61,7 @@ public class Request {
             public void onResponse(Call<Integer> call, Response<Integer> response) {
                 Log.v(TAG, response.body().toString());
                 Integer body = response.body();
-                if (body==0) {
+                if (body == 0) {
                     Call<Saved> callSave = client.saveCita(diaToSave, horaToSave);
                     callSave.enqueue(new Callback<Saved>() {
                         @Override
