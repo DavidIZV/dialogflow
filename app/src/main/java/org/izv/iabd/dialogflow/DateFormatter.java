@@ -33,7 +33,7 @@ public class DateFormatter {
     }
 
     public static String getTimeFormat() {
-        return "HH:mm";
+        return "hh:mm";
     }
 
     public static String getDateFormat() {
@@ -51,6 +51,6 @@ public class DateFormatter {
     }
 
     public static String getHourFormat() {
-        return "HH";
+        return "hh:mm";
     }
 }

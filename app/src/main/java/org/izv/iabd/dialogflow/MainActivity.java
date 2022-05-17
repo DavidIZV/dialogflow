@@ -15,8 +15,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.cloud.dialogflow.v2.DetectIntentResponse;
-
 import java.util.List;
 import java.util.Locale;
 
@@ -65,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         findViewById(R.id.enviar).setOnClickListener(view -> {
             String text = escrito.getText().toString();
             nuevaLinea(text);
-            procesarRespuestaDialog(dialogFlow.speakToDialogFlow(text));
+            dialogFlow.proccessResponse(dialogFlow.speakToDialogFlow(text), this);
         });
     }
 
@@ -108,17 +106,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             text = r.get(0);
         }
         nuevaLinea(text);
-        procesarRespuestaDialog(dialogFlow.speakToDialogFlow(text));
-    }
-
-    private void procesarRespuestaDialog(DetectIntentResponse respuestaDf) {
-        DialogFlowIntent dfIntent = dialogFlow.getResponse(respuestaDf, this);
-        //nuevaLinea(dfIntent.respuestaUsuario);
-        //hablar(dfIntent.respuestaUsuario);
-
-        /*if (DialogFlowIntent.intentCita.compareToIgnoreCase(dfIntent.intent) == 0 && dfIntent.respuestaUsuario.contains(dialogFlow.actionLabel)) {
-            saveInCalendar(dfIntent.nombre, dfIntent.fechaCorrecta);
-        }*/
+        dialogFlow.proccessResponse(dialogFlow.speakToDialogFlow(text), this);
     }
 
     public void saveInCalendar(String nombre, String fecha) {

@@ -27,11 +27,11 @@ public class DialogFlow {
 
     private SessionsClient sessionsClient;
     private SessionName sessionName;
-    private String uuid = UUID.randomUUID().toString();
-    private String TAG = "DRG-DialogFlow";
-    public String actionLabel = "Ya tiene su cita para el día ";
-    private String actionLabel_2 = "¿Para que día?";
-    private String actionLabel_3 = "¿A que hora?";
+    private final String uuid = UUID.randomUUID().toString();
+    private final String TAG = "DRG-DialogFlow";
+    private final String actionLabel = "Ya tiene su cita para el día ";
+    private final String actionLabel_2 = "¿Para que día?";
+    private final String actionLabel_3 = "¿A que hora?";
 
     public void initialize(Context context) {
         try {
@@ -65,7 +65,7 @@ public class DialogFlow {
         return sessionsClient.detectIntent(detectIntentRequest);
     }
 
-    public DialogFlowIntent getResponse(DetectIntentResponse respuestaDf, MainActivity mainActivity) {
+    public void proccessResponse(DetectIntentResponse respuestaDf, MainActivity mainActivity) {
         DialogFlowIntent response = new DialogFlowIntent();
         QueryResult queryResult = respuestaDf.getQueryResult();
         response.intent = queryResult.getIntent().getDisplayName();
@@ -87,8 +87,6 @@ public class DialogFlow {
             mainActivity.nuevaLinea(response.respuestaUsuario);
             mainActivity.hablar(response.respuestaUsuario);
         }
-
-        return response;
     }
 
     private void doCitaIntent(DialogFlowIntent response, MainActivity mainActivity) {
@@ -119,22 +117,7 @@ public class DialogFlow {
         mainActivity.hablar(response.respuestaUsuario);
     }
 
-    public String getDay(DetectIntentResponse respuestaDf) {
-        String queryResponse = respuestaDf.getQueryResult().getFulfillmentText();
-        Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
-        String day = getValueOrDefault(fieldsMap, "dia");
-        return DateFormatter.getDateFormated(day, DateFormatter.getDayFormat());
-    }
-
-    public String getHour(DetectIntentResponse respuestaDf) {
-        String queryResponse = respuestaDf.getQueryResult().getFulfillmentText();
-        Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
-        String hour = getValueOrDefault(fieldsMap, "hora");
-        return DateFormatter.getDateFormated(hour, DateFormatter.getHourFormat());
-    }
-
     public String getRightDate(DetectIntentResponse respuestaDf) {
-        String queryResponse = respuestaDf.getQueryResult().getFulfillmentText();
         Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
 
         String dia = getValueOrDefault(fieldsMap, "dia");
@@ -147,12 +130,6 @@ public class DialogFlow {
         }
 
         return dia + "T" + hora;
-    }
-
-    public String getNombre(DetectIntentResponse respuestaDf) {
-        String queryResponse = respuestaDf.getQueryResult().getFulfillmentText();
-        Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
-        return getValueOrDefault(fieldsMap, "nombre");
     }
 
     @NonNull

@@ -76,9 +76,9 @@ public class Request {
                                 responseAux += onlyDay + " de " + onlyMonth + ", a las ";
 
                                 String hour = DateFormatter.getDateFormated(dfIntent.hora, DateFormatter.getHourFormat());
-                                responseAux += hour;
+                                responseAux += hour + " ";
 
-                                responseAux += dfIntent.queryResponse.substring(55);
+                                responseAux += dfIntent.queryResponse.substring(56);
                                 dfIntent.respuestaUsuario = responseAux;
 
                                 mainActivity.saveInCalendar(dfIntent.nombre, dfIntent.fechaCorrecta);
