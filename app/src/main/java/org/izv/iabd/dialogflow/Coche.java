@@ -36,4 +36,31 @@ public class Coche {
         put("TOYOTA", "3000");
         put("VOLKSWAGEN", "3100");
     }};
+    public static Map<String, String> trans = new HashMap<String, String>() {{
+        put("COMMON.TRANSMISSION_AUTOMATIC","0");
+        put("automatica","0");
+        put("automática","0");
+        put("automaticas","0");
+        put("automáticas","0");
+        put("automatico","0");
+        put("automático","0");
+        put("COMMON.TRANSMISSION_MANUAL","1");
+        put("manual","1");
+        put("manuales","1");
+    }};
+    public static Map<String, String> bodyType = new HashMap<String, String>() {{
+        put("BODY_TYPE_4X4","500");
+        put("4X4","500");
+        put("4x4","500");
+        put("BODY_TYPE_SEDAN","700");
+        put("SEDAN","700");
+        put("BODY_TYPE_CABRIO","900");
+        put("CABRIO","900");
+        put("BODY_TYPE_FAMILIAR","1100");
+        put("FAMILIAR","1100");
+        put("BODY_TYPE_COUPE","1300");
+        put("COUPE","1300");
+        put("BODY_TYPE_MINIVAN","1500");
+        put("MINIVAN","1500");
+    }};
 }

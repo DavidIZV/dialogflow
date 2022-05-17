@@ -11,6 +11,10 @@ public class DialogFlowIntent {
     public String km;
     public String make;
     public String year;
+    public String transmissionType;
+    public String hp;
+    public String acceleration;
+    public String bodyType;
 
     public String fechaCorrecta;
     public String respuestaUsuario;

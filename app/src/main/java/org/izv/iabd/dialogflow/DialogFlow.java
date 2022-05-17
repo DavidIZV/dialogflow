@@ -83,6 +83,10 @@ public class DialogFlow {
         response.km = getValueOrDefault(fieldsMap, "km");
         response.make = getValueOrDefault(fieldsMap, "make");
         response.year = getValueOrDefault(fieldsMap, "year");
+        response.hp = getValueOrDefault(fieldsMap, "hp");
+        response.transmissionType = getValueOrDefault(fieldsMap, "transmissionType");
+        response.acceleration = getValueOrDefault(fieldsMap, "acceleration");
+        response.bodyType = getValueOrDefault(fieldsMap, "bodyType");
 
         if (DialogFlowIntent.intentCita.compareToIgnoreCase(response.intent) == 0) {
             doCitaIntent(response, mainActivity);

@@ -24,15 +24,38 @@ public class Request {
 
         IzvServer client = retrofit.create(IzvServer.class);
 
-        Call<Coche> call = client.getPrices(dfIntent.km, Coche.makes.get(dfIntent.make.toUpperCase()), dfIntent.year, "0", "0",
-                "500", "2143", "160", "8.8", "4687", "1903");
+        Call<Coche> call = client.getPrices(dfIntent.km, Coche.makes.get(dfIntent.make.toUpperCase()), dfIntent.year,
+                Coche.trans.get(dfIntent.transmissionType), "0", Coche.bodyType.get(dfIntent.bodyType),
+                "2143", dfIntent.hp, dfIntent.acceleration, "4687", "1903");
         call.enqueue(new Callback<Coche>() {
             @Override
             public void onResponse(Call<Coche> call, Response<Coche> response) {
                 Log.v(TAG, response.body().toString());
+                Log.v(TAG, response.raw().request().url().toString());
                 Coche coche = response.body();
+
+                ArrayList<Double> prices = new ArrayList<>();
+                prices.add(Double.parseDouble(coche.prediction_mlp.get("0_MLPRegressor")));
+                for (String valorCoche : coche.prediction_models.values()) {
+                    prices.add(Double.parseDouble(valorCoche));
+                }
+
+                String min = String.valueOf(prices.get(0));
+                String max = String.valueOf(prices.get(0));
+
+                for (Double valorCoche : prices) {
+                    if (valorCoche > Double.parseDouble(max)) {
+                        max = String.valueOf(valorCoche);
+                    }
+                    if (valorCoche < Double.parseDouble(min)) {
+                        min = String.valueOf(valorCoche);
+                    }
+                }
+
                 String respuestaUsuario = "Su precio segun nuestra IA es:";
-                respuestaUsuario += "\n- " + coche.prediction_mlp.get("0_MLPRegressor") + "\n";
+                respuestaUsuario += "\n- " + coche.prediction_mlp.get("0_MLPRegressor");
+                respuestaUsuario += "\n- Pero podria oscilar entre estos precios: ";
+                respuestaUsuario += "Desde " + min + " hasta " + max + "\n";
                 mainActivity.nuevaLinea(respuestaUsuario);
                 mainActivity.hablar(respuestaUsuario);
             }
