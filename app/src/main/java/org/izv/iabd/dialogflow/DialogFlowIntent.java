@@ -7,6 +7,11 @@ public class DialogFlowIntent {
     public String hora;
     public String nombre;
     public String asunto;
+
+    public String km;
+    public String make;
+    public String year;
+
     public String fechaCorrecta;
     public String respuestaUsuario;
     public String queryResponse;
@@ -14,4 +19,5 @@ public class DialogFlowIntent {
     public static String intentCita = "Cita";
     public static String intentLlama = "Llama";
     public static String intentBusca = "Busca";
+    public static String intentEstima = "Estima";
 }

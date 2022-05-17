@@ -34,6 +34,7 @@ public class DialogFlow {
     private final String actionLabel = "Ya tiene su cita para el día ";
     private final String actionLabel_2 = "¿Para que día?";
     private final String actionLabel_3 = "¿A que hora?";
+    private final String actionEstimaLabel = "Su coche vale";
 
     public void initialize(Context context) {
         try {
@@ -79,6 +80,9 @@ public class DialogFlow {
         response.dia = getValueOrDefault(fieldsMap, "dia");
         response.hora = getValueOrDefault(fieldsMap, "hora");
         response.asunto = getValueOrDefault(fieldsMap, "asunto");
+        response.km = getValueOrDefault(fieldsMap, "km");
+        response.make = getValueOrDefault(fieldsMap, "make");
+        response.year = getValueOrDefault(fieldsMap, "year");
 
         if (DialogFlowIntent.intentCita.compareToIgnoreCase(response.intent) == 0) {
             doCitaIntent(response, mainActivity);
@@ -86,6 +90,8 @@ public class DialogFlow {
             doLlamaIntent(response, mainActivity);
         } else if (DialogFlowIntent.intentBusca.compareToIgnoreCase(response.intent) == 0) {
             doBuscaIntent(response, mainActivity);
+        } else if (DialogFlowIntent.intentEstima.compareToIgnoreCase(response.intent) == 0) {
+            doEstimaIntent(response, mainActivity);
         } else {
             mainActivity.nuevaLinea(response.respuestaUsuario);
             mainActivity.hablar(response.respuestaUsuario);
@@ -131,6 +137,16 @@ public class DialogFlow {
         }
     }
 
+    private void doEstimaIntent(DialogFlowIntent response, MainActivity mainActivity) {
+        if (response.queryResponse.contains(actionEstimaLabel)) {
+            Request.getPrices(mainActivity, response);
+        } else {
+            response.respuestaUsuario = response.queryResponse;
+            mainActivity.nuevaLinea(response.respuestaUsuario);
+            mainActivity.hablar(response.respuestaUsuario);
+        }
+    }
+
     public String getRightDate(DetectIntentResponse respuestaDf) {
         Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
 
@@ -152,6 +168,9 @@ public class DialogFlow {
         Value value = fieldsMap.get(dayName);
         if (value != null && value.isInitialized()) {
             valor = value.getStringValue();
+            if (valor.isEmpty()) {
+                valor = String.valueOf(value.getNumberValue());
+            }
         }
         return valor;
     }

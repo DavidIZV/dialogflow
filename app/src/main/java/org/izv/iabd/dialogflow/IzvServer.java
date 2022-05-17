@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface IzvServer {
 
@@ -19,4 +20,11 @@ public interface IzvServer {
 
     @GET("is-reserved-cita/{fecha}/{hora}")
     Call<Integer> isFreeCita(@Path("fecha") String fecha, @Path("hora") String hora);
+
+    @GET("prediction")
+    Call<Coche> getPrices(@Query("km") String km, @Query("make") String make, @Query("year") String year,
+                          @Query("transmissionType") String transmissionType, @Query("seller_type") String seller_type,
+                          @Query("bodyType") String bodyType, @Query("cubicCapacity") String cubicCapacity,
+                          @Query("hp") String hp, @Query("acceleration") String acceleration,
+                          @Query("length") String length, @Query("width") String width);
 }
