@@ -32,7 +32,17 @@ public class DateFormatter {
         return begin;
     }
 
+    public static String getTimeFormat() {
+        return "HH:mm";
+    }
+
+    public static String getDateFormat() {
+
+        return "YYYY-MM-dd";
+    }
+
     public static String getDayFormat() {
+
         return "dd";
     }
 

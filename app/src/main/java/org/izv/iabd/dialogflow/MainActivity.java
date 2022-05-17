@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         escrito.setText("");
     }
 
-    private void hablar(String message) {
+    public void hablar(String message) {
         if (ttsReady) {
             tts.speak(message, TextToSpeech.QUEUE_ADD, null, null);
         } else {
@@ -112,13 +112,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     }
 
     private void procesarRespuestaDialog(DetectIntentResponse respuestaDf) {
-        String botReply = dialogFlow.getResponse(respuestaDf);
-        nuevaLinea(botReply);
-        hablar(botReply);
+        DialogFlowIntent dfIntent = dialogFlow.getResponse(respuestaDf, this);
+        //nuevaLinea(dfIntent.respuestaUsuario);
+        //hablar(dfIntent.respuestaUsuario);
 
-        if (botReply.contains(dialogFlow.actionLabel)) {
-            saveInCalendar(dialogFlow.getNombre(respuestaDf), dialogFlow.getRightDate(respuestaDf));
-        }
+        /*if (DialogFlowIntent.intentCita.compareToIgnoreCase(dfIntent.intent) == 0 && dfIntent.respuestaUsuario.contains(dialogFlow.actionLabel)) {
+            saveInCalendar(dfIntent.nombre, dfIntent.fechaCorrecta);
+        }*/
     }
 
     public void saveInCalendar(String nombre, String fecha) {
@@ -126,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         Intent intent = new Intent(Intent.ACTION_INSERT)
                 .setData(CalendarContract.Events.CONTENT_URI)
                 .putExtra(CalendarContract.Events.TITLE, nombre)
-                //.putExtra(CalendarContract.Events.EVENT_LOCATION, location)
                 .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, begin);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);

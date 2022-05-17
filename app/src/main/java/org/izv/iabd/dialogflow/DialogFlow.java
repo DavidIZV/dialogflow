@@ -3,6 +3,8 @@ package org.izv.iabd.dialogflow;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
@@ -18,15 +20,8 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Value;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DialogFlow {
 
@@ -37,7 +32,6 @@ public class DialogFlow {
     public String actionLabel = "Ya tiene su cita para el día ";
     private String actionLabel_2 = "¿Para que día?";
     private String actionLabel_3 = "¿A que hora?";
-    private String url = "informatica.ieszaidinvergeles.org:10056/pia/practica3/piapp/public";
 
     public void initialize(Context context) {
         try {
@@ -71,66 +65,71 @@ public class DialogFlow {
         return sessionsClient.detectIntent(detectIntentRequest);
     }
 
-    public String getResponse(DetectIntentResponse respuestaDf) {
-        String response = "";
+    public DialogFlowIntent getResponse(DetectIntentResponse respuestaDf, MainActivity mainActivity) {
+        DialogFlowIntent response = new DialogFlowIntent();
         QueryResult queryResult = respuestaDf.getQueryResult();
-        String queryResponse = queryResult.getFulfillmentText();
+        response.intent = queryResult.getIntent().getDisplayName();
+        response.queryResponse = queryResult.getFulfillmentText();
+        response.respuestaUsuario = queryResult.getFulfillmentText();
+        response.fechaCorrecta = getRightDate(respuestaDf);
 
         Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
-        String day = fieldsMap.get("dia").getStringValue();
-        String hour = fieldsMap.get("hora").getStringValue();
+        response.dia = getValueOrDefault(fieldsMap, "dia");
+        response.hora = getValueOrDefault(fieldsMap, "hora");
 
-        if (queryResponse.contains(actionLabel)) {
-            String responseAux = actionLabel;
-
-            String onlyDay = DateFormatter.getDateFormated(day, DateFormatter.getDayFormat());
-            String onlyMonth = DateFormatter.getDateFormated(day, DateFormatter.getDayFormat());
-            responseAux += onlyDay + " de " + onlyMonth + ", a las ";
-
-            hour = DateFormatter.getDateFormated(hour, DateFormatter.getHourFormat());
-            responseAux += hour;
-
-            responseAux += queryResponse.substring(55);
-            response = responseAux;
-        } else if (queryResponse.contains(actionLabel_2)) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://" + url + "/api/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-
-            IzvServer client = retrofit.create(IzvServer.class);
-
-            Call<ArrayList<Cita>> call = client.get(day);
-            call.enqueue(new Callback<ArrayList<Cita>>() {
-                @Override
-                public void onResponse(Call<ArrayList<Cita>> call, Response<ArrayList<Cita>> response) {
-                    Log.v(TAG, response.body().toString());
-                }
-
-                @Override
-                public void onFailure(Call<ArrayList<Cita>> call, Throwable t) {
-                    Log.v(TAG, t.getLocalizedMessage());
-                }
-            });
-        } else if (queryResponse.contains(actionLabel_3)) {
-
+        if (DialogFlowIntent.intentCita.compareToIgnoreCase(response.intent) == 0) {
+            doCitaIntent(response, mainActivity);
+        } else if (DialogFlowIntent.intentLlama.compareToIgnoreCase(response.intent) == 0) {
+            doLlamaIntent(response, mainActivity);
+        } else if (DialogFlowIntent.intentBusca.compareToIgnoreCase(response.intent) == 0) {
+            doBuscaIntent(response, mainActivity);
         } else {
-            response = queryResponse;
+            mainActivity.nuevaLinea(response.respuestaUsuario);
+            mainActivity.hablar(response.respuestaUsuario);
         }
+
         return response;
+    }
+
+    private void doCitaIntent(DialogFlowIntent response, MainActivity mainActivity) {
+        if (response.queryResponse.contains(actionLabel)) {
+            Request.saveCita(mainActivity, response);
+        } else if (response.queryResponse.contains(actionLabel_2)) {
+            Request.getCitasLibresEasy(mainActivity);
+        } else if (response.queryResponse.contains(actionLabel_3)) {
+            // Para controlar solo la hora
+            mainActivity.nuevaLinea(response.respuestaUsuario);
+            mainActivity.hablar(response.respuestaUsuario);
+        } else {
+            response.respuestaUsuario = response.queryResponse;
+            mainActivity.nuevaLinea(response.respuestaUsuario);
+            mainActivity.hablar(response.respuestaUsuario);
+        }
+    }
+
+    private void doLlamaIntent(DialogFlowIntent response, MainActivity mainActivity) {
+
+        mainActivity.nuevaLinea(response.respuestaUsuario);
+        mainActivity.hablar(response.respuestaUsuario);
+    }
+
+    private void doBuscaIntent(DialogFlowIntent response, MainActivity mainActivity) {
+
+        mainActivity.nuevaLinea(response.respuestaUsuario);
+        mainActivity.hablar(response.respuestaUsuario);
     }
 
     public String getDay(DetectIntentResponse respuestaDf) {
         String queryResponse = respuestaDf.getQueryResult().getFulfillmentText();
         Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
-        String day = fieldsMap.get("dia").getStringValue();
+        String day = getValueOrDefault(fieldsMap, "dia");
         return DateFormatter.getDateFormated(day, DateFormatter.getDayFormat());
     }
 
     public String getHour(DetectIntentResponse respuestaDf) {
         String queryResponse = respuestaDf.getQueryResult().getFulfillmentText();
         Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
-        String hour = fieldsMap.get("hora").getStringValue();
+        String hour = getValueOrDefault(fieldsMap, "hora");
         return DateFormatter.getDateFormated(hour, DateFormatter.getHourFormat());
     }
 
@@ -138,10 +137,14 @@ public class DialogFlow {
         String queryResponse = respuestaDf.getQueryResult().getFulfillmentText();
         Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
 
-        Value diaResponse = fieldsMap.get("dia");
-        String dia = String.valueOf(diaResponse.getStringValue()).split("T")[0];
-        Value horaResponse = fieldsMap.get("hora");
-        String hora = String.valueOf(horaResponse.getStringValue()).split("T")[1];
+        String dia = getValueOrDefault(fieldsMap, "dia");
+        if (!dia.isEmpty()) {
+            dia = dia.split("T")[0];
+        }
+        String hora = getValueOrDefault(fieldsMap, "hora");
+        if (!hora.isEmpty()) {
+            hora = hora.split("T")[1];
+        }
 
         return dia + "T" + hora;
     }
@@ -149,6 +152,16 @@ public class DialogFlow {
     public String getNombre(DetectIntentResponse respuestaDf) {
         String queryResponse = respuestaDf.getQueryResult().getFulfillmentText();
         Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
-        return fieldsMap.get("nombre").getStringValue();
+        return getValueOrDefault(fieldsMap, "nombre");
+    }
+
+    @NonNull
+    private String getValueOrDefault(Map<String, Value> fieldsMap, String dayName) {
+        String valor = "";
+        Value value = fieldsMap.get(dayName);
+        if (value != null && value.isInitialized()) {
+            valor = value.getStringValue();
+        }
+        return valor;
     }
 }
