@@ -1,6 +1,8 @@
 package org.izv.iabd.dialogflow;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -76,6 +78,7 @@ public class DialogFlow {
         Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
         response.dia = getValueOrDefault(fieldsMap, "dia");
         response.hora = getValueOrDefault(fieldsMap, "hora");
+        response.asunto = getValueOrDefault(fieldsMap, "asunto");
 
         if (DialogFlowIntent.intentCita.compareToIgnoreCase(response.intent) == 0) {
             doCitaIntent(response, mainActivity);
@@ -112,9 +115,20 @@ public class DialogFlow {
     }
 
     private void doBuscaIntent(DialogFlowIntent response, MainActivity mainActivity) {
-
         mainActivity.nuevaLinea(response.respuestaUsuario);
         mainActivity.hablar(response.respuestaUsuario);
+        String term = response.asunto;
+        term = term.replace(" ", "_");
+        searchInWikipedia(term, mainActivity);
+    }
+
+    public void searchInWikipedia(String term, MainActivity mainActivity) {
+        String url = "https://es.wikipedia.org/wiki/" + term;
+        Uri webpage = Uri.parse(url);
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+        if (intent.resolveActivity(mainActivity.getPackageManager()) != null) {
+            mainActivity.startActivity(intent);
+        }
     }
 
     public String getRightDate(DetectIntentResponse respuestaDf) {
