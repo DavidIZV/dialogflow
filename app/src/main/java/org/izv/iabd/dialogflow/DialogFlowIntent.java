@@ -7,6 +7,7 @@ public class DialogFlowIntent {
     public String hora;
     public String nombre;
     public String asunto;
+    public String check;
 
     public String km;
     public String make;

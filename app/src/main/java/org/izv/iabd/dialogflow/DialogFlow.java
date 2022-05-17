@@ -35,6 +35,8 @@ public class DialogFlow {
     private final String actionLabel_2 = "¿Para que día?";
     private final String actionLabel_3 = "¿A que hora?";
     private final String actionEstimaLabel = "Su coche vale";
+    private final String actionLlamaLabel = "¿Quieres llamar a";
+    private final String actionLlamaLabel_2 = "Llamando a";
 
     public void initialize(Context context) {
         try {
@@ -76,17 +78,7 @@ public class DialogFlow {
         response.respuestaUsuario = queryResult.getFulfillmentText();
         response.fechaCorrecta = getRightDate(respuestaDf);
 
-        Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
-        response.dia = getValueOrDefault(fieldsMap, "dia");
-        response.hora = getValueOrDefault(fieldsMap, "hora");
-        response.asunto = getValueOrDefault(fieldsMap, "asunto");
-        response.km = getValueOrDefault(fieldsMap, "km");
-        response.make = getValueOrDefault(fieldsMap, "make");
-        response.year = getValueOrDefault(fieldsMap, "year");
-        response.hp = getValueOrDefault(fieldsMap, "hp");
-        response.transmissionType = getValueOrDefault(fieldsMap, "transmissionType");
-        response.acceleration = getValueOrDefault(fieldsMap, "acceleration");
-        response.bodyType = getValueOrDefault(fieldsMap, "bodyType");
+        autoLoadValues(respuestaDf, response);
 
         if (DialogFlowIntent.intentCita.compareToIgnoreCase(response.intent) == 0) {
             doCitaIntent(response, mainActivity);
@@ -119,9 +111,34 @@ public class DialogFlow {
     }
 
     private void doLlamaIntent(DialogFlowIntent response, MainActivity mainActivity) {
-
-        mainActivity.nuevaLinea(response.respuestaUsuario);
-        mainActivity.hablar(response.respuestaUsuario);
+        String numero= mainActivity.search(response.nombre);
+        if (response.queryResponse.contains(actionLlamaLabel)) {
+            if (numero.isEmpty()) {
+                response.respuestaUsuario = "No tienes ese contacto";
+                mainActivity.nuevaLinea(response.respuestaUsuario);
+                mainActivity.hablar(response.respuestaUsuario);
+            } else {
+                response.respuestaUsuario = response.queryResponse;
+                mainActivity.nuevaLinea(response.respuestaUsuario);
+                mainActivity.hablar(response.respuestaUsuario);
+            }
+        } else if (response.queryResponse.contains(actionLlamaLabel_2)) {
+            if (numero.isEmpty()) {
+                response.respuestaUsuario = "No tienes ese contacto";
+                mainActivity.nuevaLinea(response.respuestaUsuario);
+                mainActivity.hablar(response.respuestaUsuario);
+            } else if ("okay".compareToIgnoreCase(response.check) == 0) {
+                mainActivity.callPhoneNumber(numero);
+            } else {
+                response.respuestaUsuario = "Anulando llamada";
+                mainActivity.nuevaLinea(response.respuestaUsuario);
+                mainActivity.hablar(response.respuestaUsuario);
+            }
+        } else {
+            response.respuestaUsuario = response.queryResponse;
+            mainActivity.nuevaLinea(response.respuestaUsuario);
+            mainActivity.hablar(response.respuestaUsuario);
+        }
     }
 
     private void doBuscaIntent(DialogFlowIntent response, MainActivity mainActivity) {
@@ -177,5 +194,21 @@ public class DialogFlow {
             }
         }
         return valor;
+    }
+
+    private void autoLoadValues(DetectIntentResponse respuestaDf, DialogFlowIntent response) {
+        Map<String, Value> fieldsMap = respuestaDf.getQueryResult().getParameters().getFieldsMap();
+        response.nombre = getValueOrDefault(fieldsMap, "nombre");
+        response.dia = getValueOrDefault(fieldsMap, "dia");
+        response.hora = getValueOrDefault(fieldsMap, "hora");
+        response.asunto = getValueOrDefault(fieldsMap, "asunto");
+        response.check = getValueOrDefault(fieldsMap, "check");
+        response.km = getValueOrDefault(fieldsMap, "km");
+        response.make = getValueOrDefault(fieldsMap, "make");
+        response.year = getValueOrDefault(fieldsMap, "year");
+        response.hp = getValueOrDefault(fieldsMap, "hp");
+        response.transmissionType = getValueOrDefault(fieldsMap, "transmissionType");
+        response.acceleration = getValueOrDefault(fieldsMap, "acceleration");
+        response.bodyType = getValueOrDefault(fieldsMap, "bodyType");
     }
 }

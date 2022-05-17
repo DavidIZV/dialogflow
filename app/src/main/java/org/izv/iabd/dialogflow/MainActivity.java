@@ -2,8 +2,11 @@ package org.izv.iabd.dialogflow;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
+import android.provider.ContactsContract;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
@@ -120,6 +123,32 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         } else {
             Log.d("DRG", "Error: No tenemos el paquete");
             nuevaLinea("No tenemos el paquete");
+        }
+    }
+
+    public String search(String contactName) {
+        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        String proyeccion[] = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER,
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
+        String condicion = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " like ?";
+        String argumentos[] = new String[]{ contactName };
+        String orden = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME;
+        Cursor cursor = getContentResolver().query(uri, proyeccion, condicion, argumentos, orden);
+        int columnaNombre = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+        int columnaNumero = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        String nombre, numero = "";
+        if(cursor.moveToNext()) {
+            nombre = cursor.getString(columnaNombre);
+            numero = cursor.getString(columnaNumero);
+        }
+        return numero;
+    }
+
+    public void callPhoneNumber(String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
         }
     }
 }
