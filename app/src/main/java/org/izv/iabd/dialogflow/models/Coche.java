@@ -1,4 +1,4 @@
-package org.izv.iabd.dialogflow;
+package org.izv.iabd.dialogflow.models;
 
 import java.util.HashMap;
 import java.util.Map;

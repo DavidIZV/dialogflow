@@ -1,4 +1,4 @@
-package org.izv.iabd.dialogflow;
+package org.izv.iabd.dialogflow.dialogflow;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,16 +21,20 @@ import com.google.cloud.dialogflow.v2.TextInput;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Value;
 
+import org.izv.iabd.dialogflow.MainActivity;
+import org.izv.iabd.dialogflow.R;
+import org.izv.iabd.dialogflow.clients.Request;
+
 import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
 
 public class DialogFlow {
 
+    private static final String TAG = "DRG-DialogFlow";
     private SessionsClient sessionsClient;
     private SessionName sessionName;
     private final String uuid = UUID.randomUUID().toString();
-    private final String TAG = "DRG-DialogFlow";
     private final String actionLabel = "Ya tiene su cita para el día ";
     private final String actionLabel_2 = "¿Para que día?";
     private final String actionLabel_3 = "¿A que hora?";

@@ -1,5 +1,6 @@
 package org.izv.iabd.dialogflow;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -18,11 +19,15 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.izv.iabd.dialogflow.dates.DateFormatter;
+import org.izv.iabd.dialogflow.dialogflow.DialogFlow;
+
 import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
+    private static final String TAG = "DRG-MainActivity";
     private EditText escrito;
     private TextView conversacion;
     private TextToSpeech tts;
@@ -81,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         if (ttsReady) {
             tts.speak(message, TextToSpeech.QUEUE_ADD, null, null);
         } else {
-            Log.d("DRG", "Error: No puedo hablar porque ttsReady es falso");
+            Log.d(TAG, "Error: No puedo hablar porque ttsReady es falso");
         }
     }
 
@@ -128,17 +133,16 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     public String search(String contactName) {
         Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-        String proyeccion[] = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER,
+        String[] proyeccion = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER,
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
         String condicion = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " like ?";
-        String argumentos[] = new String[]{ contactName };
+        String[] argumentos = new String[]{contactName};
         String orden = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME;
+        @SuppressLint("Recycle")
         Cursor cursor = getContentResolver().query(uri, proyeccion, condicion, argumentos, orden);
-        int columnaNombre = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
         int columnaNumero = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-        String nombre, numero = "";
-        if(cursor.moveToNext()) {
-            nombre = cursor.getString(columnaNombre);
+        String numero = "";
+        if (cursor.moveToNext()) {
             numero = cursor.getString(columnaNumero);
         }
         return numero;

@@ -1,4 +1,8 @@
-package org.izv.iabd.dialogflow;
+package org.izv.iabd.dialogflow.clients;
+
+import org.izv.iabd.dialogflow.models.Saved;
+import org.izv.iabd.dialogflow.models.Cita;
+import org.izv.iabd.dialogflow.models.Coche;
 
 import java.util.ArrayList;
 

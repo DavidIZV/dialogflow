@@ -1,4 +1,4 @@
-package org.izv.iabd.dialogflow;
+package org.izv.iabd.dialogflow.models;
 
 public class Cita {
 

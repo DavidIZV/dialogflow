@@ -1,6 +1,13 @@
-package org.izv.iabd.dialogflow;
+package org.izv.iabd.dialogflow.clients;
 
 import android.util.Log;
+
+import org.izv.iabd.dialogflow.dates.DateFormatter;
+import org.izv.iabd.dialogflow.dialogflow.DialogFlowIntent;
+import org.izv.iabd.dialogflow.MainActivity;
+import org.izv.iabd.dialogflow.models.Saved;
+import org.izv.iabd.dialogflow.models.Cita;
+import org.izv.iabd.dialogflow.models.Coche;
 
 import java.util.ArrayList;
 
@@ -12,7 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Request {
 
-    static public String TAG = "DRG-Request";
+    private static final String TAG = "DRG-Request";
     static public String url = "informatica.ieszaidinvergeles.org:10056/pia/practica3/piapp/public";
     static public String url_coches = "david1994.pythonanywhere.com/cars/";
 
@@ -81,13 +88,13 @@ public class Request {
             public void onResponse(Call<ArrayList<Cita>> call, Response<ArrayList<Cita>> response) {
                 Log.v(TAG, response.body().toString());
                 ArrayList<Cita> citasLibres = response.body();
-                String respuestaUsuario = "Las proximas citas libres son:";
+                StringBuilder respuestaUsuario = new StringBuilder("Las proximas citas libres son:");
                 for (Cita cita : citasLibres) {
-                    respuestaUsuario += "\n- " + cita.fecha + " a las " + cita.hora;
+                    respuestaUsuario.append("\n- ").append(cita.fecha).append(" a las ").append(cita.hora);
                 }
-                respuestaUsuario += "\n¿Cual de ellas le interesa?\n";
-                mainActivity.nuevaLinea(respuestaUsuario);
-                mainActivity.hablar(respuestaUsuario);
+                respuestaUsuario.append("\n¿Cual de ellas le interesa?\n");
+                mainActivity.nuevaLinea(respuestaUsuario.toString());
+                mainActivity.hablar(respuestaUsuario.toString());
             }
 
             @Override
@@ -117,7 +124,6 @@ public class Request {
                     callSave.enqueue(new Callback<Saved>() {
                         @Override
                         public void onResponse(Call<Saved> call, Response<Saved> response) {
-                            Log.v(TAG, response.body().toString());
                             Saved body = response.body();
                             if (body.save) {
                                 String responseAux = "Ya tiene su cita para el día ";
