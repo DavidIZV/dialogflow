@@ -116,7 +116,7 @@ public class DialogFlow {
     }
 
     private void doLlamaIntent(DialogFlowIntent response, MainActivity mainActivity) {
-        String numero= mainActivity.search(response.nombre);
+        String numero = mainActivity.search(response.nombre);
         if (response.queryResponse.contains(actionLlamaLabel)) {
             if (numero.isEmpty()) {
                 response.respuestaUsuario = "No tienes ese contacto";
@@ -189,13 +189,16 @@ public class DialogFlow {
     }
 
     @NonNull
-    private String getValueOrDefault(Map<String, Value> fieldsMap, String dayName) {
+    private String getValueOrDefault(Map<String, Value> fieldsMap, String name) {
         String valor = "";
-        Value value = fieldsMap.get(dayName);
+        Value value = fieldsMap.get(name);
         if (value != null && value.isInitialized()) {
             valor = value.getStringValue();
             if (valor.isEmpty()) {
                 valor = String.valueOf(value.getNumberValue());
+            }
+            if ("0.0".equals(valor)) {
+                valor = "";
             }
         }
         return valor;

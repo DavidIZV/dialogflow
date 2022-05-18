@@ -32,12 +32,11 @@ public class Request {
         IzvServer client = retrofit.create(IzvServer.class);
 
         Call<Coche> call = client.getPrices(dfIntent.km, Coche.makes.get(dfIntent.make.toUpperCase()), dfIntent.year,
-                Coche.trans.get(dfIntent.transmissionType), "0", Coche.bodyType.get(dfIntent.bodyType),
+                Coche.trans.get(dfIntent.transmissionType), "0", Coche.bodyType.get(dfIntent.bodyType.toUpperCase()),
                 "2143", dfIntent.hp, dfIntent.acceleration, "4687", "1903");
         call.enqueue(new Callback<Coche>() {
             @Override
             public void onResponse(Call<Coche> call, Response<Coche> response) {
-                Log.v(TAG, response.body().toString());
                 Log.v(TAG, response.raw().request().url().toString());
                 Coche coche = response.body();
 

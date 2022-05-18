@@ -52,6 +52,8 @@ public class Coche {
         put("BODY_TYPE_4X4","500");
         put("4X4","500");
         put("4x4","500");
+        put("4 X 4","500");
+        put("4 x 4","500");
         put("BODY_TYPE_SEDAN","700");
         put("SEDAN","700");
         put("BODY_TYPE_CABRIO","900");
