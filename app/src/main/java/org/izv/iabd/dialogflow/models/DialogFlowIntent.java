@@ -1,4 +1,4 @@
-package org.izv.iabd.dialogflow.dialogflow;
+package org.izv.iabd.dialogflow.models;
 
 public class DialogFlowIntent {
 

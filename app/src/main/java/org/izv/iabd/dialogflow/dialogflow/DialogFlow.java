@@ -24,6 +24,7 @@ import com.google.protobuf.Value;
 import org.izv.iabd.dialogflow.MainActivity;
 import org.izv.iabd.dialogflow.R;
 import org.izv.iabd.dialogflow.clients.Request;
+import org.izv.iabd.dialogflow.models.DialogFlowIntent;
 
 import java.io.InputStream;
 import java.util.Map;

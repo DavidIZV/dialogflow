@@ -3,7 +3,7 @@ package org.izv.iabd.dialogflow.clients;
 import android.util.Log;
 
 import org.izv.iabd.dialogflow.dates.DateFormatter;
-import org.izv.iabd.dialogflow.dialogflow.DialogFlowIntent;
+import org.izv.iabd.dialogflow.models.DialogFlowIntent;
 import org.izv.iabd.dialogflow.MainActivity;
 import org.izv.iabd.dialogflow.models.Saved;
 import org.izv.iabd.dialogflow.models.Cita;
